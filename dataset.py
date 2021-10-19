@@ -49,7 +49,7 @@ test_transforms = A.Compose([
 
 
 class RsnaDataset(Dataset):
-    def __init__(self, df, transforms=None, path='../data/stage_2_train_images/'):
+    def __init__(self, df, transforms=None, path='/home/beomgon/Dataset/rsna1/stage_2_train_images/' ):
         self.df = df
         self.transforms = transforms if transforms else None
         self.dir = path
@@ -85,7 +85,10 @@ class RsnaDataset(Dataset):
 
 def get_rsna_data(args) :    
     
-    PATH = 'data/'
+    PATH = '/home/beomgon/Dataset/rsna1/'
+    if not os.path.isdir(PATH) :
+        PATH = 'data'
+
     df = pd.read_csv(PATH + 'stage_2_train_labels.csv')
     df = df.drop_duplicates('patientId').reset_index(drop=True)
     
@@ -101,10 +104,10 @@ def get_rsna_data(args) :
     print(len(test_df[test_df['Target']==1])/len(test_df))   
     
     BATCH_SIZE = args.batch_size
-    train_dataset = RsnaDataset(train_df, transforms=train_transforms, path='data/stage_2_train_images/')
+    train_dataset = RsnaDataset(train_df, transforms=train_transforms)
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=args.workers)
 
-    test_dataset = RsnaDataset(test_df, transforms=test_transforms, path='data/stage_2_train_images/')
+    test_dataset = RsnaDataset(test_df, transforms=test_transforms)
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=args.workers)     
     
     return train_loader, test_loader
@@ -145,4 +148,5 @@ def get_imagenet_data(args) :
         num_workers=args.workers, pin_memory=True)
 
     return train_loader, val_loader
+
 
