@@ -71,6 +71,8 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
 parser.add_argument('--gpu', default=None, type=int,
                     help='GPU id to use.')
 
+best_acc1 = 0
+
 def main() :
     args = parser.parse_args()
     print('isrsna', args.isrsna)
@@ -99,6 +101,7 @@ def main() :
         
 def main_worker(gpu, ngpus_per_node, args) :
     
+    global best_acc1
     args.gpu = gpu
     print('gpu', args.gpu)
     if args.gpu is not None:
@@ -120,11 +123,11 @@ def main_worker(gpu, ngpus_per_node, args) :
     else :
         train_loader ,test_loader = get_imagenet_data(args)
     
-#     model= torchvision.models.resnet50(pretrained=True)
-    backbone_model= torchvision.models.resnet50(pretrained=True)
-    model = resnet50(pretrained=False)
-    print(model.conv1.weight[0,0,0])
-    model.load_state_dict(backbone_model.state_dict(), strict=False)
+    model= torchvision.models.resnet50(pretrained=True)
+#    backbone_model= torchvision.models.resnet50(pretrained=True)
+#    model = resnet50(pretrained=False)
+#    print(model.conv1.weight[0,0,0])
+#    model.load_state_dict(backbone_model.state_dict(), strict=False)
     
     criterion = nn.CrossEntropyLoss()
     
@@ -161,6 +164,7 @@ def main_worker(gpu, ngpus_per_node, args) :
 
         # train for one epoch
         epoch_loss = train(train_loader, model, criterion, optimizer, epoch, args)
+#        epoch_loss = 1.
 
         # evaluate on validation set
         acc1 = validate(test_loader, model, criterion, args)  
@@ -209,6 +213,8 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     for i, (images, target) in enumerate(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
+        #print(images.shape)
+        #print(target)
 
         if args.gpu is not None:
             images = images.cuda(args.gpu, non_blocking=True)
